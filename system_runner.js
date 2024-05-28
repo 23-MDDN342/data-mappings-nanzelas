@@ -41,6 +41,11 @@ if (typeof NUM_SLIDERS === 'undefined' || NUM_SLIDERS === null) {
   var NUM_SLIDERS = 12;
 }
 
+// randomFace
+let curRandomSeed2 = 0;
+let lastSwapTime2 = 0;
+const millisPerSwap2 = 3000;
+const bg_color2 = [71, 222, 219]
 async function preload () {
   sample_images = loadJSON('sample_images.json')
   trainValues = loadJSON('training_values.json');
@@ -71,6 +76,7 @@ function squaredDistance(a, b) {
 
 var haveStarted = false;
 function setup () {
+  curRandomSeed = int(random(0, 1000));
   let keys = Object.keys(sample_images);
   for (let i=0; i<keys.length; i++) {
     let obj = {};
@@ -224,17 +230,19 @@ function getAllJson() {
 
 // global variables for colors
 var bg_color1 = [50, 50, 50];
-
 var lastSwapTime = 0;
 var millisPerSwap = 5000;
 
 function changeRandomSeed() {
   curRandomSeed = curRandomSeed + 1;
   lastSwapTime = millis();
+
+  curRandomSeed2 = curRandomSeed2 + 1;
+  lastSwapTime2 = millis();
 }
 
 function mouseClicked() {
-  // changeRandomSeed();
+  changeRandomSeed();
 }
 
 var quiz_done = true;
@@ -254,6 +262,7 @@ var processing_vid_face = false;
 var lastProcessedVidFace = null;
 
 async function draw () {
+  push();
   if (!model_loaded) {
     return;
   }
@@ -288,7 +297,7 @@ async function draw () {
 
     if(!faces_processed) {
       return;
-    }    
+    }
   }
 
   var mode = faceSelector.value();
@@ -319,7 +328,7 @@ async function draw () {
     if(do_train) {
       // var keys = Object.keys(trainData);
       var curKey = trainDataKeys[curTrainIndex];
-      var data = trainData[curKey];      
+      var data = trainData[curKey];
     }
     else {
       var data = selfieData[curFaceIndex];
@@ -418,7 +427,7 @@ async function draw () {
       else {
         fill(200, 0, 0);
       }
-      ellipse(x1+400/2, y1+400+15, 10, 10);      
+      ellipse(x1+400/2, y1+400+15, 10, 10);
     }
 
     if(!DEBUG_MODE) {
@@ -481,7 +490,7 @@ async function draw () {
           stroke(0, 0, 255);
           ellipse(0, 0, 4, 4);
           line(0, -2, 0, 2);
-          line(-2, 0, 2, 0);        
+          line(-2, 0, 2, 0);
       }
       // ellipse(x1+data_mean[0], y1+data_mean[1], 4*data_scale, 4*data_scale);
       // line(x1+data_mean[0], y1+data_mean[1]-2*data_scale, x1+data_mean[0], y1+data_mean[1]+2*data_scale);
@@ -548,7 +557,7 @@ async function draw () {
     for(var i=0; i<4; i++) {
       // var keys = Object.keys(trainData);
       var curKey = curNeighbors[i];
-      var nearData = trainData[curKey];      
+      var nearData = trainData[curKey];
 
       // Displays the image at its actual size at point (0,0)
       var img = nearData.image
@@ -668,7 +677,7 @@ async function draw () {
     for(var i=0; i<4; i++) {
       // var keys = Object.keys(trainData);
       var curKey = curNeighbors[i];
-      var nearData = trainData[curKey];      
+      var nearData = trainData[curKey];
 
       // Displays the image at its actual size at point (0,0)
       var img = nearData.image
@@ -742,7 +751,7 @@ async function draw () {
           // if(otherKeys.length > j+2) {
           //   while(answerKeys.indexOf(guess) == -1) {
           //     guess = int(focusedRandom(0, otherKeys.length));
-          //   }            
+          //   }
           // }
           curKey = otherKeys[guess];
         }
@@ -771,7 +780,7 @@ async function draw () {
         }
         littleFace.draw(shifted_positions);
         pop();
-        if(quiz_done && guessed_answer == (j+1)) {          
+        if(quiz_done && guessed_answer == (j+1)) {
           push();
           translate(x2, y2);
           noFill();
@@ -791,25 +800,25 @@ async function draw () {
           if (valid_mode && (answerSlot+1) == (j+1)) {
             for(var k=0; k<4; k++) {
               var curKey = validTrainKeys[k];
-              var nearData = trainData[curKey];      
+              var nearData = trainData[curKey];
               // Displays the image at its actual size at point (0,0)
               var img = nearData.image
               var x2 = (width/2 - 200 + j*100 + (k%2)*40);
               var y4 = y3 + (int(k/2))*40;
-              image(img, x2, y4, 40, 40);              
+              image(img, x2, y4, 40, 40);
             }
           }
           else {
             var curKey = answerKeys[j];
-            var nearData = trainData[curKey];      
+            var nearData = trainData[curKey];
             // Displays the image at its actual size at point (0,0)
             if (typeof nearData !== 'undefined') {
               var img = nearData.image
               var x2 = (width/2 - 200 + j*100);
-              image(img, x2, y3, 80, 80);            
+              image(img, x2, y3, 80, 80);
             }
           }
-        }          
+        }
       }
     }
 
@@ -818,7 +827,7 @@ async function draw () {
         textDisplay = "InterpolationQuiz: hit a number to continue";
       }
       else {
-        textDisplay = "InterpolationQuiz: hit 1, 2, 3, or 4 to guess";        
+        textDisplay = "InterpolationQuiz: hit 1, 2, 3, or 4 to guess";
       }
     }
     else {
@@ -826,7 +835,7 @@ async function draw () {
         textDisplay = "TrainingQuiz: hit a number to continue";
       }
       else {
-        textDisplay = "TrainingQuiz: hit 1, 2, 3, or 4 to guess";        
+        textDisplay = "TrainingQuiz: hit 1, 2, 3, or 4 to guess";
       }
     }
   }
@@ -835,6 +844,11 @@ async function draw () {
   textSize(32);
   textAlign(CENTER);
   text(textDisplay, width/2, height-12);
+
+  pop();
+
+
+
 }
 
 async function keyTyped() {
@@ -1035,12 +1049,7 @@ function updateSlidersForTraining() {
   }
 
   loadCurrentSettings();
-  // if(mode == 'NearestNeighbors') {
-  //   interpolateCurrent();
-  // }
-  // else {
-  //   loadCurrentSettings();
-  // }
+
 }
 
 function getAverageSettingsFrom(e) {
