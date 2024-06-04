@@ -27,7 +27,7 @@ var faceMapping = null;
 let model_loaded = false;
 let faces_processing = false;
 let faces_processed = false;
-
+let   hair;
 var sample_images;
 var selfieData = []
 
@@ -43,6 +43,7 @@ if (typeof NUM_SLIDERS === 'undefined' || NUM_SLIDERS === null) {
 
 async function preload () {
   sample_images = loadJSON('sample_images.json')
+  hair = loadImage('1.png')
   trainValues = loadJSON('training_values.json');
   if (!DEBUG_MODE) {
     await faceapi.loadSsdMobilenetv1Model("./");
